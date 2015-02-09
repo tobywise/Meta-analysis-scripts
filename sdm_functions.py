@@ -71,7 +71,6 @@ extract_coordinate_values(result_coords, "BD_mean", "C:/Users/k1327409/Dropbox/P
 
 """
 
-
 # ############################################################################################################
 # ## This function checks jackknife output files for any results that differ from the original analysis     ##
 # ## ...It's a bit of a mess                                                                                ##
@@ -129,8 +128,3 @@ def check_jackknife(mean_results, jk_directory, save_results=True):
 check_jackknife("J:/MA test stuff/MDD Only/14_03_14_MDD_Mean_z_p0.00500_1.000_10.htm", 'J:/MA test stuff/MDD Only')
 
 """
-
-
-
-
-
