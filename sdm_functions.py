@@ -59,9 +59,10 @@ def extract_coordinate_values(coordinates, prefix, sdm_path):
     sdm_path += " "
     for i in range(len(coordinates)):
         name = prefix + "_coords_" + str(i+1)  # format = prefix_coords_#
-        mask_arg = name + " = mask coordinate " + coordinates[i]  # arguments for masking function
+        mask_arg = name + " = mask coordinate, " + coordinates[i].replace(',', ', ')  # arguments for masking function
         extract_arg = "extract " + name  # arguments for extraction function
         print mask_arg  # prints mask arguments to make sure they're correct
+        print shlex.split(sdm_path + mask_arg)
         subprocess.call(shlex.split(sdm_path + mask_arg))
         subprocess.call(shlex.split(sdm_path + extract_arg))
 
@@ -97,8 +98,8 @@ def threshold_jackknife(directory, sdm_path):
 
     for result in results:
         arg = 'threshold ' + result + ', p, 0.005, 1, 10'
-        print arg
-        subprocess.call(shlex.split(sdm_path + arg))
+        print shlex.split(sdm_path + arg)
+        #subprocess.call(shlex.split(sdm_path + arg))
 
 # Example usage
 """
