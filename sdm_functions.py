@@ -80,7 +80,7 @@ extract_coordinate_values(result_coords, "BD_mean", "C:/Users/k1327409/Dropbox/P
 def threshold_jackknife(directory, sdm_path):
     """
     Looks for jackknife results in a given directory and thresholds them all
-    Uses default settings (p < .005, peak height = 1, extent = 10
+    Uses default settings (p < .005, peak height = 1, extent = 10)
 
     Arguments
     ---------
