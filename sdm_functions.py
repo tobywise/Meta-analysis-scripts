@@ -9,7 +9,7 @@ import shlex
 # ## These functions take SDM cluster results in HTML format and extracts values for the peak coordinates   ##
 # ## get_coords: produces a list of coordinates from the HTML file                                          ##
 # ## extract_coordinate_values: takes a list of coordinates and extracts values at these points             ##
-# ## SDM will output the results in the current working directory - make sure to set this before running    ##
+# ## SDM will use results in the current working directory - make sure to set this before running           ##
 # ## Extracted files are numbered - need to make a note of which number corresponds to each cluster         ##
 # ############################################################################################################
 
@@ -99,12 +99,12 @@ def threshold_jackknife(directory, sdm_path):
     for result in results:
         arg = 'threshold ' + result + ', p, 0.005, 1, 10'
         print shlex.split(sdm_path + arg)
-        #subprocess.call(shlex.split(sdm_path + arg))
+        subprocess.call(shlex.split(sdm_path + arg))
 
 # Example usage
-"""
+
 threshold_jackknife('C:/Users/k1327409/Documents/MA stuff', 'C:/Users/k1327409/Dropbox/PhD/Things/sdm_v4.12/sdm_v4.12/sdm.bat')
-"""
+
 
 
 # ############################################################################################################
