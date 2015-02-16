@@ -1,34 +1,48 @@
 require(ggplot2)
 require(metafor)
 
-# extract values and from meta-regressions and adds them to sdm table
+add_extracted <- function(dir, analysis_name, regex_selector){
+  # Function to extract values and from meta-regressions and add them to sdm table
+  # 
+  # Arguments:
+  # dir = directory where the results of the extraction are (the .txt files)
+  # analysis_name = name of the analysis you want the extracted values for, e.g. if the files are named
+  #   extract_MDD_medication_metareg_C1.txt etc., the analysis name would be "MDD_medication_metareg"
+  #   This allows you to select only the extracted values for analyses you're interested in. Set to "" 
+  #   to load all extracted results
+  # regex_selector = regular expression to select particular studies, set to "" if not needed
+  # 
+  # Returns:
+  # sdm_table = sdm_table with additional columns for estimate and variance at each coordinate
+  #
 
-dir <- "C:/Users/k1327409/Dropbox/PhD/MDD BD Meta-analysis/Results/BD Results/"
-files <- list.files(path=dir)  # gets files in directory
-
-sdm_table <- read.table(paste(dir,'sdm_table.txt', sep = ""), header = TRUE)  # load sdm table
-sdm_table <- subset(sdm_table, grepl("et_al_.+[^ab]_sMRI", sdm_table$study))
-
-col_names <- colnames(sdm_table)
-
-for (i in 1:length(files)) {
-  if(grepl("extract.+.txt", files[i])) {  # only use the files containing extracted values
-    name <- gsub(".txt", "", files[i])  # remove .txt part for naming
-    print(name)
-    data <- read.table(paste(dir, files[i], sep = ""), header = TRUE)  # read the table
-    data <- subset(data, grepl("et_al_.+[^ab]_sMRI", data$map))  # need to select only combined studies here
-    est_name <- paste(name, "_estimate", sep="")
-    var_name <- paste(name, "_variance", sep="")
-    col_names <- c(col_names, est_name, var_name)  # add cluster estimate & variance names to column names
-    sdm_table <- cbind(sdm_table, data$estimate)  # append estimate and variance to data
-    sdm_table <- cbind(sdm_table, data$variance)
+  files <- list.files(path=dir)  # gets files in directory
+  
+  sdm_table <- read.table(paste(dir,'sdm_table.txt', sep = ""), header = TRUE)  # load sdm table
+  sdm_table <- subset(sdm_table, grepl(regex_selector, sdm_table$study))
+  
+  col_names <- colnames(sdm_table)
+  
+  for (i in 1:length(files)) {
+    if(grepl(paste("extract_", analysis_name, ".+.txt",sep = ""), files[i])) {  # only use the files containing extracted values
+      name <- gsub(".txt", "", files[i])  # remove .txt part for naming
+      print(name)
+      data <- read.table(paste(dir, files[i], sep = ""), header = TRUE)  # read the table
+      data <- head(data, -3)  # remove last 3 rows, which give overall results
+      data <- subset(data, grepl(regex_selector, data$map))  # need to select only combined studies here
+      est_name <- paste(name, "_estimate", sep="")
+      var_name <- paste(name, "_variance", sep="")
+      col_names <- c(col_names, est_name, var_name)  # add cluster estimate & variance names to column names
+      sdm_table <- cbind(sdm_table, data$estimate)  # append estimate and variance to data
+      sdm_table <- cbind(sdm_table, data$variance)
+    }
   }
+  
+  colnames(sdm_table) <- col_names  # name the columns properly
+  return(sdm_table)
 }
 
-colnames(sdm_table) <- col_names  # name the columns properly
 
-
-# function to create meta-regression plots
 reg_plot <- function(data, estimate, variance, predictor){
   # Function to create meta-regression plots with point sizes from weights
   # and regression line from meta-regression
@@ -54,11 +68,14 @@ reg_plot <- function(data, estimate, variance, predictor){
   return(ggobj)
 }
 
+#Example usage
 
+# Get extracted values for all coordinates in a folder
+sdm_table <- add_extracted("C:/Users/k1327409/Dropbox/PhD/MDD BD Meta-analysis/Results/BD Results/", "", "et_al_.+[^ab]_sMRI")
 
-# Run this function for all meta-regression outputs
-ests <- colnames(sdm_table)[grepl("extract.+estimate", colnames(sdm_table))]
-vars <- colnames(sdm_table)[grepl("extract.+variance", colnames(sdm_table))]
+# Run plotting function for all meta-regression outputs
+ests <- colnames(sdm_table)[grepl("extract.+estimate", colnames(sdm_table))]  # get estimates
+vars <- colnames(sdm_table)[grepl("extract.+variance", colnames(sdm_table))]  # get variances
 
 for (i in 1:length(ests)) {  # assumes ests and vars are in the same order
   print(ests[i])
