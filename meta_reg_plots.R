@@ -71,16 +71,16 @@ reg_plot <- function(data, estimate, variance, predictor){
 #Example usage
 
 # Get extracted values for all coordinates in a folder
-sdm_table <- add_extracted("C:/Users/k1327409/Dropbox/PhD/MDD BD Meta-analysis/Results/BD Results/", "", "et_al_.+[^ab]_sMRI")
+sdm_table <- add_extracted("C:/Users/k1327409/Dropbox/PhD/MDD BD Meta-analysis/Results/BD Results/1602/", "", "et_al_.+[^ab]_sMRI")
 
 # Run plotting function for all meta-regression outputs
-ests <- colnames(sdm_table)[grepl("extract.+estimate", colnames(sdm_table))]  # get estimates
-vars <- colnames(sdm_table)[grepl("extract.+variance", colnames(sdm_table))]  # get variances
+ests <- colnames(sdm_table)[grepl("extract_BD_sex.+estimate", colnames(sdm_table))]  # get estimates
+vars <- colnames(sdm_table)[grepl("extract_BD_sex.+variance", colnames(sdm_table))]  # get variances
 
 for (i in 1:length(ests)) {  # assumes ests and vars are in the same order
   print(ests[i])
   print(vars[i])
-  assign(paste(ests[i], "_meds_plot", sep =""), reg_plot(sdm_table, ests[i], vars[i], 'MedicationPercent'))
+  assign(paste(ests[i], "_sex_plot", sep =""), reg_plot(sdm_table, ests[i], vars[i], 'PercentMale'))
 }
 
 
