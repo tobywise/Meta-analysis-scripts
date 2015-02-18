@@ -1,4 +1,3 @@
-__author__ = 'k1327409'
 import nibabel
 from scipy import ndimage
 import numpy as np
@@ -79,14 +78,13 @@ def check_jk_niftis(mean_niftis, jk_dir):
                 jk_img = jk_nifti_p
                 original_img = original_nifti_p
                 original_aff = original_aff_p
-            elif img == 'n':
+            else:
                 jk_img = jk_nifti_n
                 original_img = original_nifti_n
                 original_aff = original_aff_n
 
             labeled_array, num_features = ndimage.label(jk_img, structure=s)
 
-            # NEED TO SOMEHOW LABEL CLUSTERS SO YOU KNOW WHICH ONE IS WHICH
             for i in np.unique(labeled_array):
                 if i != 0:
                     print "Cluster " + str(i)
