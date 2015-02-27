@@ -45,7 +45,8 @@ def check_jk_niftis(mean_niftis, jk_dir):
     for jk in jk_files:
         if re.match(r'.+_z_p_.+(?<!p\.nii)\.gz', jk):  # only thresholded niftis
             jk_niftis.append(jk)
-            study_name = re.findall(r'(?<=[a-z]JK).+(?=_z_p)', jk)[0]  # get study name out of file name
+            print jk
+            study_name = re.findall(r'(?<=[a-z,_]JK).+(?=_z_p)', jk)[0]  # get study name out of file name
             studies.append(study_name)
 
     studies = set(studies)  # make list values unique
@@ -110,9 +111,9 @@ def check_jk_niftis(mean_niftis, jk_dir):
 
 # Example
 """
-mean_niftis = ["C:/Users/k1327409/Documents/VBShare/0502_mean_BD_z_p_0.00500_1.000_10.nii.gz",
-               "C:/Users/k1327409/Documents/VBShare/0502_mean_BD_z_p_0.00500_1.000_10_neg.nii.gz"]
-jk_dir = 'C:/Users/k1327409/Documents/VBShare/BD JK'
+mean_niftis = ["C:/Users/k1327409/Documents/VBShare/2602_analysis/2602_BD_mean_z_p_0.00500_1.000_10.nii.gz",
+               "C:/Users/k1327409/Documents/VBShare/2602_analysis/2602_BD_mean_z_p_0.00500_1.000_10_neg.nii.gz"]
+jk_dir = 'C:/Users/k1327409/Documents/VBShare/2602_analysis/JK/Thresholded'
 
 jackknife_check_output = check_jk_niftis(mean_niftis, jk_dir)
 """

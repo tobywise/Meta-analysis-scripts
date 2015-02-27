@@ -20,6 +20,7 @@ add_extracted <- function(dir, analysis_name, regex_selector){
   
   sdm_table <- read.table(paste(dir,'sdm_table.txt', sep = ""), header = TRUE)  # load sdm table
   sdm_table <- subset(sdm_table, grepl(regex_selector, sdm_table$study))
+  sdm_table$PercentMale <- sdm_table$PercentMale*100
   
   col_names <- colnames(sdm_table)
   
@@ -83,4 +84,16 @@ for (i in 1:length(ests)) {  # assumes ests and vars are in the same order
   assign(paste(ests[i], "_sex_plot", sep =""), reg_plot(sdm_table, ests[i], vars[i], 'PercentMale'))
 }
 
-
+antipsychotics_multi <- multiplot(extract_BD_antipsychotic_metareg_coords_1_estimate_antipsychotic_plot + 
+                                    ylab("C1 Est"), extract_BD_antipsychotic_metareg_coords_2_estimate_antipsychotic_plot + 
+                                    ylab("C2 Est"), extract_BD_antipsychotic_metareg_coords_3_estimate_antipsychotic_plot + 
+                                    ylab("C3 Est"),extract_BD_antipsychotic_metareg_coords_4_estimate_antipsychotic_plot + 
+                                    ylab("C4 Est"),extract_BD_antipsychotic_metareg_coords_5_estimate_antipsychotic_plot + 
+                                    ylab("C5 Est"),extract_BD_antipsychotic_metareg_coords_6_estimate_antipsychotic_plot + 
+                                    ylab("C6 Est"), cols=2)
+lithium_multi <- multiplot(extract_BD_lithium_metareg_coords_1_estimate_lithium_plot + ylab("C1 Est"), extract_BD_lithium_metareg_coords_2_estimate_lithium_plot + ylab("C2 Est"), cols=2)
+sex_multi <- multiplot(extract_BD_sex_metareg_coords_1_estimate_sex_plot + 
+                                    ylab("C1 Est"), extract_BD_sex_metareg_coords_2_estimate_sex_plot + 
+                                    ylab("C2 Est"), extract_BD_sex_metareg_coords_3_estimate_sex_plot + 
+                                    ylab("C3 Est"),extract_BD_sex_metareg_coords_4_estimate_sex_plot + 
+                                    ylab("C4 Est"), cols=2)
