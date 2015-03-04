@@ -5,7 +5,7 @@ import os
 import re
 
 
-def check_jk_niftis(mean_niftis, jk_dir):
+def check_jk_niftis(mean_niftis, jk_dir, regex=r'(?<=[a-z,_]JK).+(?=_z_p)'):
     """
     Compares jack-knife nifti outputs with an original nifti file to check whether clusters disappear
 
@@ -13,6 +13,7 @@ def check_jk_niftis(mean_niftis, jk_dir):
     ----------
     mean_niftis = List of thresholded positive and negative mean analysis niftis - i.e. ['pos.nii.gz', 'neg.nii.gz']
     jk_dir = Directory containing the thresholded results of the jackknife analysis
+    regex = regex expression for identifying jack-knife outputs, can be changed to identify different outputs
 
     Returns:
     --------
@@ -46,8 +47,9 @@ def check_jk_niftis(mean_niftis, jk_dir):
         if re.match(r'.+_z_p_.+(?<!p\.nii)\.gz', jk):  # only thresholded niftis
             jk_niftis.append(jk)
             print jk
-            study_name = re.findall(r'(?<=[a-z,_]JK).+(?=_z_p)', jk)[0]  # get study name out of file name
-            studies.append(study_name)
+            study_name = re.search(regex, jk)  # get study name out of file name
+            if study_name:
+                studies.append(study_name.group())
 
     studies = set(studies)  # make list values unique
     studies = list(studies)
@@ -71,19 +73,22 @@ def check_jk_niftis(mean_niftis, jk_dir):
         jk_nifti_p[np.where(original_nifti_p == 0)] = 0  # mask with original image - anything 0 in original becomes 0
         jk_nifti_n[np.where(original_nifti_n == 0)] = 0  # mask with original image - anything 0 in original becomes 0
 
-        print "Checking " + study
+        print "*****************\nChecking " + study + '\n*****************'
         for img in ['p', 'n']:  # do this for both positive and negative results
 
             if img == 'p':
                 jk_img = jk_nifti_p
                 original_img = original_nifti_p
                 original_aff = original_aff_p
+                print "Positive Clusters\n*****************"
             else:
                 jk_img = jk_nifti_n
                 original_img = original_nifti_n
                 original_aff = original_aff_n
+                print "*****************\nNegative Clusters\n*****************"
 
             labeled_array, num_features = ndimage.label(jk_img, structure=s)  # Label clusters in masked JK image
+
 
             for i in np.unique(labeled_array):  # iterate over clusters
                 if i != 0:
@@ -117,3 +122,14 @@ jk_dir = 'C:/Users/k1327409/Documents/VBShare/2602_analysis/JK/Thresholded'
 
 jackknife_check_output = check_jk_niftis(mean_niftis, jk_dir)
 """
+
+# Or for checking overlap of meta-regressions
+
+mean_niftis = ["C:/Users/k1327409/Documents/VBShare/2602_analysis/2602_BD_mean_z_p_0.00500_1.000_10.nii.gz",
+               "C:/Users/k1327409/Documents/VBShare/2602_analysis/2602_BD_mean_z_p_0.00500_1.000_10_neg.nii.gz"]
+qh_niftis = ["C:/Users/k1327409/Documents/VBShare/2602_analysis/2602_BD_mean_QH_z_p_0.00500_1.000_10.nii.gz",
+               "C:/Users/k1327409/Documents/VBShare/2602_analysis/2602_BD_mean_QH_z_p_0.00500_1.000_10.nii.gz"]
+metareg_dir = 'C:/Users/k1327409/Documents/VBShare/2602_analysis'
+
+metareg_mean_check_output = check_jk_niftis(mean_niftis, metareg_dir, regex=r'^.+(?=_1m0)')
+metareg_qh_check_output = check_jk_niftis(qh_niftis, metareg_dir, regex=r'^.+(?=_1m0)')
