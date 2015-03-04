@@ -13,7 +13,7 @@ def check_jk_niftis(mean_niftis, jk_dir, regex=r'(?<=[a-z,_]JK).+(?=_z_p)'):
     ----------
     mean_niftis = List of thresholded positive and negative mean analysis niftis - i.e. ['pos.nii.gz', 'neg.nii.gz']
     jk_dir = Directory containing the thresholded results of the jackknife analysis
-    regex = regex expression for identifying jack-knife outputs, can be changed to identify different outputs
+    regex (Optional) = regex expression for identifying jack-knife outputs, can be changed to identify different outputs
 
     Returns:
     --------
