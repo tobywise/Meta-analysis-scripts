@@ -3,9 +3,10 @@ from scipy import ndimage
 import numpy as np
 import os
 import re
+import pandas as pd
 
 
-def check_jk_niftis(mean_niftis, jk_dir, regex=r'(?<=[a-z,_]JK).+(?=_z_p)'):
+def check_jk_niftis(mean_niftis, jk_dir, regex=r'(?<=[a-z,_]JK).+(?=_z_p)', csv_name=''):
     """
     Compares jack-knife nifti outputs with an original nifti file to check whether clusters disappear
 
@@ -14,10 +15,11 @@ def check_jk_niftis(mean_niftis, jk_dir, regex=r'(?<=[a-z,_]JK).+(?=_z_p)'):
     mean_niftis = List of thresholded positive and negative mean analysis niftis - i.e. ['pos.nii.gz', 'neg.nii.gz']
     jk_dir = Directory containing the thresholded results of the jackknife analysis
     regex (Optional) = regex expression for identifying jack-knife outputs, can be changed to identify different outputs
+    csv_name (Optional) = name for a csv file to save results to, doesn't save csv if not given
 
     Returns:
     --------
-    results_dict = A dictionary containing the peak coordinate of each cluster and studies where it isn't present
+    output_df = A pandas dataframe containing the peak coordinate of each cluster and studies where it isn't present
 
     Also prints out the results for each study including the percentage of voxels that are missing
 
@@ -29,6 +31,8 @@ def check_jk_niftis(mean_niftis, jk_dir, regex=r'(?<=[a-z,_]JK).+(?=_z_p)'):
     original_nifti_n = nibabel.load(mean_niftis[1]).get_data()
     original_aff_p = nibabel.load(mean_niftis[0]).get_affine()
     original_aff_n = nibabel.load(mean_niftis[1]).get_affine()
+    original_nifti_p_sig = nibabel.load(mean_niftis[0].replace('.nii', '_p.nii')).get_data()
+    original_nifti_n_sig = nibabel.load(mean_niftis[1].replace('.nii', '_p.nii')).get_data()
 
     # structure for labeling - there's probably a better way to define this
     s = [[[1, 1, 1],
@@ -80,11 +84,13 @@ def check_jk_niftis(mean_niftis, jk_dir, regex=r'(?<=[a-z,_]JK).+(?=_z_p)'):
                 jk_img = jk_nifti_p
                 original_img = original_nifti_p
                 original_aff = original_aff_p
+                original_sig = original_nifti_p_sig
                 print "Positive Clusters\n*****************"
             else:
                 jk_img = jk_nifti_n
                 original_img = original_nifti_n
                 original_aff = original_aff_n
+                original_sig = original_nifti_n_sig
                 print "*****************\nNegative Clusters\n*****************"
 
             labeled_array, num_features = ndimage.label(jk_img, structure=s)  # Label clusters in masked JK image
@@ -98,31 +104,44 @@ def check_jk_niftis(mean_niftis, jk_dir, regex=r'(?<=[a-z,_]JK).+(?=_z_p)'):
                     total_vox = float(labeled_array[np.where(labeled_array == i)].shape[0])
 
                     max = np.max(original_img[np.where(labeled_array == i)])  # get maximum value in cluster
+                    max_sig = np.max(original_sig[np.where(labeled_array == i)])
                     max_coords = np.where((original_img == max) & (labeled_array == i))  # find where this max is
                     max_coords_arr = np.zeros(3)  # np.where outputs as tuple of arrays- need to convert to array
                     for i in range(0, len(max_coords)):
                         max_coords_arr[i] = max_coords[i][0]
                     max_coords_mni = nibabel.affines.apply_affine(original_aff, max_coords_arr)  # convert to MNI coords
                     if not str(max_coords_mni) in results_dict:
-                        results_dict[str(max_coords_mni)] = []  # create empty dictionary entry for coordinates
+                        results_dict[str(max_coords_mni)] = [max_coords_mni, img, max, 1-max_sig, total_vox, []]  # create empty dictionary entry for coordinates
                     print max_coords_mni
                     print "Cluster size = " + str(int(total_vox)) + " voxels"
                     print "Percent missing voxels = " + str(round(missing_vox/total_vox*100, 2)) + "%"
                     if m == -999:  # if mean = -999, indicates that the cluster is all missing
                         print "Cluster not present"
-                        results_dict[str(max_coords_mni)].append(study)  # add study name to coordinate entry
+                        results_dict[str(max_coords_mni)][5].append(study)  # add study name to coordinate entry
 
-    return results_dict
+    output_df = pd.DataFrame(results_dict.values())
+    output_df.columns = ['Coordinates', 'Pos/neg', 'Peak Z', 'Significance', 'Size', 'Studies']
+    output_df = output_df.sort(['Pos/neg', 'Size'], ascending=[0, 0])
+    output_df['Peak Z'][output_df['Pos/neg'] == 'n'] = 0 - output_df['Peak Z']
+    output_df = output_df.reset_index(drop=True)
+    if csv_name:
+        output_df.to_csv(csv_name)
+
+    print "FINISHED"
+
+    return output_df
+
 
 # Example
-"""
-mean_niftis = ["C:/Users/k1327409/Documents/VBShare/2602_analysis/2602_BD_mean_z_p_0.00500_1.000_10.nii.gz",
-               "C:/Users/k1327409/Documents/VBShare/2602_analysis/2602_BD_mean_z_p_0.00500_1.000_10_neg.nii.gz"]
-jk_dir = 'C:/Users/k1327409/Documents/VBShare/2602_analysis/JK/Thresholded'
 
-jackknife_check_output = check_jk_niftis(mean_niftis, jk_dir)
-"""
 
+mean_niftis = ["C:/Users/k1327409/Documents/VBShare/24_03/23_03_BD_Mean_z_p_0.00500_1.000_10.nii.gz",
+               "C:/Users/k1327409/Documents/VBShare/24_03/23_03_BD_Mean_z_p_0.00500_1.000_10_neg.nii.gz"]
+jk_dir = 'C:/Users/k1327409/Documents/VBShare/24_03/Jackknife'
+
+jackknife_check_output = check_jk_niftis(mean_niftis, jk_dir, csv_name='23_03_BD_jackknife.csv')
+
+"""
 # Or for checking overlap of meta-regressions
 
 mean_niftis = ["C:/Users/k1327409/Documents/VBShare/2602_analysis/2602_BD_mean_z_p_0.00500_1.000_10.nii.gz",
@@ -133,3 +152,6 @@ metareg_dir = 'C:/Users/k1327409/Documents/VBShare/2602_analysis'
 
 metareg_mean_check_output = check_jk_niftis(mean_niftis, metareg_dir, regex=r'^.+(?=_1m0)')
 metareg_qh_check_output = check_jk_niftis(qh_niftis, metareg_dir, regex=r'^.+(?=_1m0)')
+"""
+
+
