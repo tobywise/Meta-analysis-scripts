@@ -63,15 +63,21 @@ def extract_coordinate_values(coordinates, prefix, sdm_path):
         extract_arg = "extract " + name  # arguments for extraction function
         print mask_arg  # prints mask arguments to make sure they're correct
         print shlex.split(sdm_path + mask_arg)
-        subprocess.call(shlex.split(sdm_path + mask_arg))
-        subprocess.call(shlex.split(sdm_path + extract_arg))
+        mask_arg = shlex.split(sdm_path + mask_arg)
+        extract_arg = shlex.split(sdm_path + extract_arg)
+        #if " " in sdm_path:
+          #  mask_arg[0] = '"' + mask_arg[0] + '"'
+          #  extract_arg[0] = '"' + extract_arg[0] + '"'
+        #print mask_arg
+        subprocess.call(mask_arg)
+        subprocess.call(extract_arg)
 
 
 # Example usage
-
+"""
 result_coords = get_coords('C:/Users/k1327409/Dropbox/PhD/DTI/dti_ma/MDD Only/14_03_14_MDD_Meds_1m0_z_p0.00050_1.000_10.htm')
 extract_coordinate_values(result_coords, "BD_mean", "C:/Users/k1327409/Dropbox/PhD/Things/sdm_v4.12/sdm_v4.12/sdm.bat")
-
+"""
 
 # ############################################################################################################
 # ## This function thresholds all jackknife results in a given directory                                    ##
@@ -102,9 +108,9 @@ def threshold_jackknife(directory, sdm_path):
         subprocess.call(shlex.split(sdm_path + arg))
 
 # Example usage
-
+"""
 threshold_jackknife('C:/Users/k1327409/Documents/MA stuff', 'C:/Users/k1327409/Dropbox/PhD/Things/sdm_v4.12/sdm_v4.12/sdm.bat')
-
+"""
 
 
 # ############################################################################################################
@@ -163,4 +169,9 @@ def check_jackknife(mean_results, jk_directory, save_results=True):
 """
 check_jackknife("J:/MA test stuff/MDD Only/14_03_14_MDD_Mean_z_p0.00500_1.000_10.htm", 'J:/MA test stuff/MDD Only')
 
+
+
+
+os.chdir('C:/Users/k1327409/Documents/VBShare/MDD_sMRI/MDD_JK_1')
+threshold_jackknife('C:/Users/k1327409/Documents/VBShare/MDD_sMRI/MDD_JK_1', 'C:/Users/k1327409/Dropbox/PhD/Things/sdm_v4.12/sdm_v4.12/sdm.bat')
 """

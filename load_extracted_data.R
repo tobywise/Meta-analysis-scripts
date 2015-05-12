@@ -2,8 +2,11 @@
 
 require(metafor)
 
-dir <- "C:/Users/k1327409/Dropbox/PhD/MDD BD Meta-analysis/Results/BD Results/"
+#dir <- "C:/Users/k1327409/Dropbox/PhD/MDD BD Meta-analysis/Results/BD Results/"
+dir <- "C:/Users/k1327409/Documents/VBShare/24_03/"
 files <- list.files(path=dir) 
+
+par(mfrow = c(4,6))
 
 for (i in 1:length(files)) {
   if(grepl("extract.+.txt", files[i])) {
