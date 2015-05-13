@@ -40,7 +40,7 @@ def threshold_img(p_image, z_image, p_threshold, z_threshold, extent):
 
     sizes = stats.itemfreq(labeled_array)
 
-    for i in range(1, np.max(labeled_array)):
+    for i in range(1, np.max(labeled_array)+1):
         if sizes[i][1] < extent:
             z_data[np.where(labeled_array == i)] = 0
 
