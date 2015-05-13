@@ -60,7 +60,9 @@ reg_plot <- function(data, estimate, variance, predictor,bar=FALSE, invert=FALSE
   # Returns:
   # Outputs plot and saves as a pdf
   #
+  print(data[,predictor])
   data <- subset(data, data[,predictor]!='NA')  # exclude any studies where the predictor value is NA
+  print(data[,predictor])
   if(bar==FALSE) {
     meta <- rma(data[,estimate], data[,variance], mods=data[,predictor], data = data)  # do meta-regression
     preds <- predict(meta, newmods = c(0:100))  # predict for 0:100 using meta-regression
@@ -79,7 +81,7 @@ reg_plot <- function(data, estimate, variance, predictor,bar=FALSE, invert=FALSE
     est_min = min(data[,estimate]) - (max(data[,estimate]))/10
     ggobj <- ggplot(data=data, aes_string(x = predictor, y = estimate)) + geom_point(size = (weights*0.5+1)) + theme_bw() +
       geom_line(data = meta_data, aes(x = number, y = preds.pred), size = 0.5) + xlab(predictor)  + ylab(estimate) +
-      scale_x_continuous(limits = c(0, pred_max)) + scale_y_continuous(limits = c(est_min, est_max))
+      scale_x_continuous(limits = c(pred_min, pred_max)) + scale_y_continuous(limits = c(est_min, est_max))
   }
   
   else {
@@ -117,46 +119,71 @@ reg_plot <- function(data, estimate, variance, predictor,bar=FALSE, invert=FALSE
   }
   
   #ggsave(file=paste(predictor, estimate, ".pdf", sep = "_"), width = 8, height = 6)  # save as pdf
-  #return(ggobj)
-  return(meta_b)
+  return(ggobj)
+  #return(meta_b)
 }
 
 #Example usage
 
 # Get extracted values for all coordinates in a folder
-sdm_table <- add_extracted("C:/Users/k1327409/Documents/VBShare/24_03/", "", "^(combined_t_)?[A-Za-z]+_?[A-Za-z]+_et_al_.+(?<![012456789][ab])_sMRI")
+sdm_table_bd <- add_extracted("C:/Users/k1327409/Documents/VBShare/24_03/0605metareg/", "",
+                              "^(combined_t_)?[A-Za-z]+_?[A-Za-z]+_et_al_.+(?<![012456789][ab])_sMRI")
+sdm_table_dep_euth <- subset(sdm_table_bd, State=="Depressed" | State=="Euthymic")
+sdm_table_dep_euth$State <- ifelse(sdm_table_dep_euth$State=="Depressed", 0, 1)
 
 # Run plotting function for all meta-regression outputs
-ests <- colnames(sdm_table)[grepl("extract_2303_BD_dep_euth.+estimate", colnames(sdm_table))]  # get estimates
-vars <- colnames(sdm_table)[grepl("extract_2303_BD_dep_euth.+variance", colnames(sdm_table))]  # get variances
+ests <- colnames(sdm_table_bd)[grepl("extract_lithium.+estimate", colnames(sdm_table_bd))]  # get estimates
+vars <- colnames(sdm_table_bd)[grepl("extract_lithium.+variance", colnames(sdm_table_bd))]  # get variances
 
 
 for (i in 1:length(ests)) {  # assumes ests and vars are in the same order
   print(ests[i])
   print(vars[i])
-  assign(paste(ests[i], "_mood_state_plot", sep =""), reg_plot(sdm_table_dep_euth, ests[i], vars[i], 'State'))
+  assign(paste(ests[i], "_state_plot_1205", sep =""), reg_plot(sdm_table_bd, ests[i], vars[i], 'LithiumPercent'))
+}
+
+# And for mood state with the dep/euth table
+ests <- colnames(sdm_table_dep_euth)[grepl("extract_state.+estimate", colnames(sdm_table_dep_euth))]  # get estimates
+vars <- colnames(sdm_table_dep_euth)[grepl("extract_state.+variance", colnames(sdm_table_dep_euth))]  # get variances
+
+for (i in 1:length(ests)) {  # assumes ests and vars are in the same order
+  print(ests[i])
+  print(vars[i])
+  assign(paste(ests[i], "_state_plot_1205", sep =""), reg_plot(sdm_table_dep_euth, ests[i], vars[i], 'State', bar=TRUE))
 }
 
 
-antipsychotics_multi <- multiplot(extract_2303_BD_antipsychotic_metareg_coords_1_estimate_antipsychotic_plot + 
-                                    ylab("C1 Est"), extract_2303_BD_antipsychotic_metareg_coords_2_estimate_antipsychotic_plot + 
-                                    ylab("C2 Est"), extract_2303_BD_antipsychotic_metareg_coords_3_estimate_antipsychotic_plot + 
-                                    ylab("C3 Est"),extract_2303_BD_antipsychotic_metareg_coords_4_estimate_antipsychotic_plot + 
-                                    ylab("C4 Est"),extract_2303_BD_antipsychotic_metareg_coords_5_estimate_antipsychotic_plot + 
-                                    ylab("C5 Est"), cols=2)
-lithium_multi <- multiplot(extract_2303_BD_lithium_metareg_coords_1_estimate_lithium_plot + ylab("C1 Est"), extract_2303_BD_lithium_metareg_coords_2_estimate_lithium_plot + 
-                                    ylab("C2 Est"), cols=2)
-sex_multi <- multiplot(extract_2303_BD_sex_metareg_coords_1_estimate_sex_plot + 
-                                    ylab("C1 Est"), extract_2303_BD_sex_metareg_coords_2_estimate_sex_plot + 
-                                    ylab("C2 Est"), extract_2303_BD_sex_metareg_coords_3_estimate_sex_plot + 
-                                    ylab("C3 Est"),extract_2303_BD_sex_metareg_coords_4_estimate_sex_plot + 
-                                    ylab("C4 Est"), cols=2)
-state_multi <- multiplot(extract_2303_BD_dep_euth_metareg_coords_1_estimate_mood_state_plot + 
-                         ylab("C1 Est"), extract_2303_BD_dep_euth_metareg_coords_2_estimate_mood_state_plot + 
-                         ylab("C2 Est"), extract_2303_BD_dep_euth_metareg_coords_3_estimate_mood_state_plot + 
-                         ylab("C3 Est"),extract_2303_BD_dep_euth_metareg_coords_4_estimate_mood_state_plot + 
-                         ylab("C4 Est"), cols=2)
+lithium_multi <- multiplot(extract_lithium_coords_coords_1_estimate_lithium_plot_1205 + 
+                             ylab("C1 Est"), extract_lithium_coords_coords_2_estimate_lithium_plot_1205 + 
+                             ylab("C2 Est"), extract_lithium_coords_coords_3_estimate_lithium_plot_1205 + 
+                             ylab("C3 Est"),extract_lithium_coords_coords_4_estimate_lithium_plot_1205 + 
+                             ylab("C4 Est"), extract_lithium_coords_coords_5_estimate_lithium_plot_1205 + 
+                             ylab("C5 Est"), cols=3)
+sex_multi <- multiplot(extract_sex_coords_coords_1_estimate_sex_plot_1205 + 
+                              ylab("C1 Est"), extract_sex_coords_coords_2_estimate_sex_plot_1205 + 
+                              ylab("C2 Est"), extract_sex_coords_coords_3_estimate_sex_plot_1205 + 
+                              ylab("C3 Est"), cols=2)
+age_multi <- multiplot(extract_age_coords_coords_1_estimate_age_plot_1205 + 
+                         ylab("C1 Est"), extract_age_coords_coords_2_estimate_age_plot_1205 + 
+                         ylab("C2 Est"), extract_age_coords_coords_3_estimate_age_plot_1205 + 
+                         ylab("C3 Est"), cols=2)
+duration_multi <- multiplot(extract_duration_coords_coords_1_estimate_duration_plot_1205 + 
+                         ylab("C1 Est"), extract_duration_coords_coords_2_estimate_duration_plot_1205 + 
+                         ylab("C2 Est"), extract_duration_coords_coords_3_estimate_duration_plot_1205 + 
+                         ylab("C3 Est"), cols=2)
 
+state_multi <- multiplot(extract_state_coords_coords_1_estimate_state_plot_1205 + 
+                         ylab("C1 Est"), extract_state_coords_coords_2_estimate_state_plot_1205 + 
+                         ylab("C2 Est"), cols=2)
+
+reg_plot(sdm_table_bd, "extract_lithium_coords_coords_2_estimate", "extract_lithium_coords_coords_2_variance", 
+         'LithiumPercent', invert=TRUE) + ylab("SDM Z") + xlab("Percentage of patients\nreceiving lithium")
+
+reg_plot(sdm_table_bd, "extract_age_coords_coords_1_estimate", "extract_age_coords_coords_1_variance", 
+         'PatientAge', invert=TRUE) + ylab("SDM Z") + xlab("Mean age")
+
+reg_plot(sdm_table_bd, "extract_age_coords_coords_2_estimate", "extract_age_coords_coords_2_variance", 
+         'PatientAge', invert=TRUE) + ylab("SDM Z") + xlab("Mean age")
 
 # MDD
 # Get extracted values for all coordinates in a folder
