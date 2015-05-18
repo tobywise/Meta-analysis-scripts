@@ -26,7 +26,8 @@ def get_coords(html_file):
     -------
     coords_list: List of extracted coordinates
     """
-
+    from bs4 import BeautifulSoup
+    import re
     output = BeautifulSoup(open(html_file, 'r'))  # opens the html and makes it look nice
     # use regular expressions to find the main cluster coordinates
     coords = re.findall(r'/table>.*?-?\d+,-?\d+,-?\d+', str(output))
@@ -55,7 +56,8 @@ def extract_coordinate_values(coordinates, prefix, sdm_path):
     SDM's outputs from these functions are saved
     Prints each cluster name and coordinates when run
     """
-
+    import subprocess
+    import shlex
     sdm_path += " "
     for i in range(len(coordinates)):
         name = prefix + "_coords_" + str(i+1)  # format = prefix_coords_#
@@ -94,12 +96,16 @@ def threshold_jackknife(directory, sdm_path):
     directory: Directory where the jackknife results are
     sdm_path: Path to SDM (must be to the SDM.bat file)
     """
-
+    import re
+    import subprocess
+    import os
+    import shlex
     sdm_path += " "
     files = os.listdir(directory)
     results = []
     for file in files:
         if re.match(r'.+JK.+(?<!QH)_z.htm', file):
+            print file
             results.append(file.replace('.htm', ''))
 
     for result in results:
@@ -134,6 +140,8 @@ def check_jackknife(mean_results, jk_directory, save_results=True):
     Prints/writes to text original coordinates, each jackknife iteration and
     coordinates that differ (new additions, original ones missing)
     """
+    import re
+    import os
 
     files = os.listdir(jk_directory)
     real_coords = get_coords(mean_results)
