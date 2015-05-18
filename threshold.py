@@ -50,3 +50,8 @@ def threshold_img(p_image, z_image, p_threshold, z_threshold, extent):
 
     print "Thresholded %s at %s, %s, %s" % (z_image, p_threshold, z_threshold, extent)
 
+p = 'C:\Users\k1327409\Documents\VBShare\MDD_BD_Conjunction\MDD_pos_BD_pos_praw.nii.gz'
+z = 'C:\Users\k1327409\Documents\VBShare\MDD_BD_Conjunction\MDD_pos_BD_pos_z.nii.gz'
+
+threshold_img(p, z, 0.005, 0.0638, 10)
+
