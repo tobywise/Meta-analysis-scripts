@@ -45,7 +45,7 @@ add_extracted <- function(dir, analysis_name, regex_selector){
 }
 
 
-reg_plot <- function(data, estimate, variance, predictor,bar=FALSE, invert=FALSE){
+reg_plot <- function(data, estimate, variance, predictor,bar=FALSE, invert=FALSE, return_meta=FALSE){
   # Function to create meta-regression plots with point sizes from weights
   # and regression line from meta-regression
   #
@@ -56,6 +56,7 @@ reg_plot <- function(data, estimate, variance, predictor,bar=FALSE, invert=FALSE
   # predictor = predictor variable for meta-regression
   # bar = gives bar plot instead of scatter
   # invert = inverts the y axis so positive effect sizes become negative
+  # return_meta = returns a meta analysis on the extracted values rather than the plot
   # 
   # Returns:
   # Outputs plot and saves as a pdf
@@ -80,7 +81,7 @@ reg_plot <- function(data, estimate, variance, predictor,bar=FALSE, invert=FALSE
     est_max = max(data[,estimate]) + (max(data[,estimate]))/10
     est_min = min(data[,estimate]) - (max(data[,estimate]))/10
     ggobj <- ggplot(data=data, aes_string(x = predictor, y = estimate)) + geom_point(size = (weights*0.5+1)) + theme_bw() +
-      geom_line(data = meta_data, aes(x = number, y = preds.pred), size = 0.5) + xlab(predictor)  + ylab(estimate) +
+      geom_line(data = meta_data, aes(x = number, y = preds.pred), size = 0.5) + xlab('Mean Age')  + ylab('SDM-Z') +
       scale_x_continuous(limits = c(pred_min, pred_max)) + scale_y_continuous(limits = c(est_min, est_max))
   }
   
@@ -119,7 +120,12 @@ reg_plot <- function(data, estimate, variance, predictor,bar=FALSE, invert=FALSE
   }
   
   #ggsave(file=paste(predictor, estimate, ".pdf", sep = "_"), width = 8, height = 6)  # save as pdf
-  return(ggobj)
+  if (return_meta==TRUE){
+    return(meta_b)
+  }
+  else {
+    return(ggobj)
+  }
   #return(meta_b)
 }
 
