@@ -30,7 +30,6 @@ def run_entire_meta_analysis(ma_dir, sdm_path, analysis_name, metareg_columns, f
         if re.match(r'sdm_table.txt$', f):
             sdm_table = ma_dir + f
 
-
     #  preprocess
     print "Preprocessing"
     print shlex.split(sdm_path + ' pp gray_matter, 1.0, 20, gray_matter, 2')

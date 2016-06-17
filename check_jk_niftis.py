@@ -161,3 +161,14 @@ qh_niftis = ["C:/Users/k1327409/Documents/VBShare/24_03/23_03_BD_Mean_QH_z_p_0.0
 metareg_dir = 'C:/Users/k1327409/Documents/VBShare/24_03'
 
 """
+mean_niftis_p = ["C:/Users/k1327409/Documents/VBShare/fromNAN/Analysis_0901_A/0403_MDD_mean_z_p_0.00500_1.000_10.nii.gz",
+               "C:/Users/k1327409/Documents/VBShare/fromNAN/Analysis_0901_A/0403_MDD_mean_z_p_0.00500_1.000_10.nii.gz"]
+mean_niftis_n = ["C:/Users/k1327409/Documents/VBShare/fromNAN/Analysis_0901_A/0403_MDD_mean_z_p_0.00500_1.000_10_neg.nii.gz",
+               "C:/Users/k1327409/Documents/VBShare/fromNAN/Analysis_0901_A/0403_MDD_mean_z_p_0.00500_1.000_10_neg.nii.gz"]
+qh_niftis = ["C:/Users/k1327409/Documents/VBShare/fromNAN/Analysis_0901_A/0403_MDD_mean_QH_z_p_0.00500_1.000_10.nii.gz",
+               "C:/Users/k1327409/Documents/VBShare/fromNAN/Analysis_0901_A/0403_MDD_mean_QH_z_p_0.00500_1.000_10.nii.gz"]
+metareg_dir = 'C:/Users/k1327409/Documents/VBShare/fromNAN/Analysis_0901_A/mr'
+
+os.chdir('C:/Users/k1327409/Documents/VBShare/fromNAN/Analysis_0901_A')
+
+check_jk_niftis(qh_niftis, metareg_dir, regex=r'^.+(?=_1m0)', csv_name='29_01_16_metaregs_qh.csv', metareg=True)
